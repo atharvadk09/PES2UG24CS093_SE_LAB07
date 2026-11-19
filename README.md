@@ -70,30 +70,3 @@ captured with `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` to exclude unrelated host plugi
 this is not required in a clean virtual environment. Screenshots show terminal
 views of actual saved run output. CLI input was supplied automatically, and the
 input sequence is recorded at the top of each application log.
-
-## Reproduce original failures
-
-Use the same Python executable where dependencies were installed. From `lab7`:
-
-```powershell
-Push-Location evidence\original
-..\..\.venv\Scripts\python.exe thermostat_control.py
-..\..\.venv\Scripts\python.exe -m pytest test_thermostat_control.py -q --tb=short
-Pop-Location
-```
-
-The original application and original-version tests are intentionally failing.
-`pytest.ini` excludes the archived `evidence` directory from recursive collection.
-The explicit commands above run the intended suite for each version.
-
-## Main fixes and viva notes
-
-- Fuzzing generates unexpected inputs; Hypothesis shrinks failures to small examples.
-- Empty strings and `None` exposed unsafe slicing, conversion and `.split()` calls.
-- Explicit type, format, range and finite-number checks prevent these failures.
-- `21K` was silently accepted as Celsius; units are now checked.
-- `24:00` and `23:60` were accepted; time bounds are now checked.
-- Daytime minutes previously lost leading zeros; both slots now use two digits.
-- Large finite readings could overflow an intermediate sum; `statistics.mean`
-  avoids this. Fahrenheit conversion divides before multiplying for the same reason.
-- Passing this suite demonstrates the tested properties, not absence of every bug.
